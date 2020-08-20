@@ -129,14 +129,3 @@ class Subscription(Base):
     purchase_id = Column(String)
     subscription_folder_id = Column(String)
     price = Column(DOUBLE_PRECISION)
-
-
-class DemoBoards(Base):
-    __tablename__ = 'demo_interests_boards'
-
-    boardid = Column(String, primary_key=True)
-    unsubscribedusers = Column(JSON, nullable=False, default=[])
-
-
-class Board(Base):
-    __tablename__ = 'board'
