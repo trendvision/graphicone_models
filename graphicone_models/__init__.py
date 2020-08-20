@@ -121,7 +121,8 @@ class Payment(Base):
 class Subscription(Base):
     __tablename__ = 'subscription'
 
-    username = Column(String, primary_key=True)
+    username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='NO ACTION'),
+                      primary_key=True)
     name = Column(String, nullable=False)
     link = Column(String, nullable=False, default='')
     description = Column(String, nullable=False, default='')
@@ -129,3 +130,7 @@ class Subscription(Base):
     purchase_id = Column(String)
     subscription_folder_id = Column(String)
     price = Column(DOUBLE_PRECISION)
+
+
+# class Board(Base):
+#     __tablename__ = 'subscription'
