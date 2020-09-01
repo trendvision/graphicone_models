@@ -1,9 +1,11 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Boolean, String, JSON, DateTime, Integer, ForeignKey, func
+from sqlalchemy import Column, Boolean, String, JSON, DateTime, Integer, ForeignKey, func, schema, text
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION
 
 
 Base = declarative_base()
+BOARD_ID = schema.Sequence('board_id', start=1000000000000, increment=1)
+GRAPH_ID = schema.Sequence('graph_id', start=1000000000000, increment=1)
 
 
 class Account(Base):
@@ -132,5 +134,39 @@ class Subscription(Base):
     price = Column(DOUBLE_PRECISION)
 
 
-# class Board(Base):
-#     __tablename__ = 'subscription'
+class Board(Base):
+    __tablename__ = 'board'
+
+    id = Column(String, BOARD_ID, primary_key=True, default=text("'B' || nextval('board_id')"))
+    name = Column(String, nullable=False)
+    owner = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='NO ACTION'))
+    members = Column(JSON, nullable=False, default=[])
+    preview_img_url = Column(String, nullable=False, default='')
+    graphs_count = Column(Integer, default=0, autoincrement=False)
+    privacy = Column(String)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
+
+
+class Graph(Base):
+    __tablename__ = 'graph'
+
+    id = Column(String, GRAPH_ID, primary_key=True, default=text("'G' || nextval('board_id')"))
+    name = Column(String, nullable=False, default='')
+    location = Column(String, nullable=False)
+    location_id = Column(String)
+    link_small = Column(JSON, nullable=False)
+    link_medium = Column(JSON, nullable=False)
+    link_large = Column(JSON, nullable=False)
+    owner = Column(JSON, nullable=False)
+    source = Column(String, nullable=False, default='')
+    description = Column(String, nullable=False, default='')
+    parent = Column(String, default=None)
+    publish_date = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
+    article_link = Column(String, nullable=False, default='')
+    publisher = Column(String, ForeignKey('account.username', ondelete='NO ACTION', onupdate='NO ACTION'))
+    mongo_id = Column(String)
+    graph_type = Column(String)
+    shifts = Column(JSON, nullable=False, default=[])
+    industries = Column(JSON, nullable=False, default=[])
+    upvote = Column(Integer, nullable=False, default=0)
