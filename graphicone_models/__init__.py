@@ -1,8 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Boolean, String, JSON, DateTime, Integer, ForeignKey, func, schema, text,\
     PrimaryKeyConstraint, BigInteger, Float
-from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION
 from sqlalchemy.orm import relationship
+import datetime
 
 
 Base = declarative_base()
@@ -134,7 +134,7 @@ class Subscription(Base):
     demo_board_id = Column(String, ForeignKey('board.id', ondelete='CASCADE', onupdate='NO ACTION'))
     purchase_id = Column(String, nullable=False)
     subscription_folder_id = Column(String)
-    price = Column(DOUBLE_PRECISION)
+    price = Column(Float)
 
 
 class Board(Base):
@@ -295,3 +295,14 @@ class BlockedUser(Base):
     id = Column(Integer, primary_key=True)
     id_blocking_user = Column(String, nullable=False)
     id_blocked_user = Column(String, nullable=False)
+
+
+class TemporaryPass(Base):
+    __tablename__ = 'temporary_pass'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='CASCADE'))
+    email = Column(String, nullable=False)
+    temp_pass = Column(String, nullable=False)
+    valid_until = Column(DateTime(timezone=True), nullable=False,
+                         default=func.current_timestamp() + datetime.timedelta(days=1))
