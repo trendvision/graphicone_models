@@ -14,17 +14,17 @@ class Account(Base):
     __tablename__ = 'account'
 
     username = Column(String, primary_key=True, index=True)
-    password_hash = Column(String)
-    email = Column(String, unique=True)
-    interests = Column(JSON)
-    favorite = Column(JSON)
-    name = Column(String)
-    image_url = Column(JSON)
-    occupation = Column(String)
-    join_date = Column(DateTime(timezone=True))
-    following_allow = Column(Boolean)
-    subscriptions = Column(JSON)
-    is_social_notification = Column(Boolean)
+    password_hash = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    interests = Column(JSON, nullable=False, default={})
+    favorite = Column(JSON, nullable=False, default=[])
+    name = Column(String, nullable=False)
+    image_url = Column(JSON, nullable=False, default=[])
+    occupation = Column(String, nullable=False, default='')
+    join_date = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
+    following_allow = Column(Boolean, nullable=False, default=False)
+    subscriptions = Column(JSON, nullable=False, default=[])
+    is_social_notification = Column(Boolean, nullable=False, default=True)
 
 
 class Device(Base):
@@ -53,7 +53,7 @@ class EmailNotification(Base):
 
     username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='NO ACTION'),
                       primary_key=True, nullable=False)
-    push_notification_day = Column(String, nullable=False)
+    push_notification_day = Column(String, nullable=False, default='THU')
     enable = Column(Boolean, nullable=False)
 
 
@@ -120,7 +120,7 @@ class Payment(Base):
     web_order_line_item_id = Column(String)
     is_intro_period = Column(Boolean)
     is_trial_period = Column(Boolean)
-    insert_timestamp = Column(DateTime(timezone=True), nullable=False, default=func.cuurrent_timestamp())
+    insert_timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
 
 
 class Subscription(Base):
@@ -306,3 +306,20 @@ class TemporaryPass(Base):
     temp_pass = Column(String, nullable=False)
     valid_until = Column(DateTime(timezone=True), nullable=False,
                          default=func.current_timestamp() + datetime.timedelta(days=1))
+
+
+class AccessData(Base):
+    __tablename__ = 'access_data'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='CASCADE'))
+    login = Column(DateTime(timezone=True), nullable=True)
+    logout = Column(DateTime(timezone=True), nullable=True)
+    password = Column(DateTime(timezone=True), nullable=True)
+
+
+def to_dict(record: Base):
+    dict_ = {}
+    for key in record.__mapper__.c.keys():
+        dict_[key] = getattr(record, key)
+    return dict_
