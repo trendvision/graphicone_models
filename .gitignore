@@ -1,0 +1,6 @@
+.idea
+build/
+dist/
+graphicone_models.egg-info
+graphicone_models/__pycache__/
+venv/
