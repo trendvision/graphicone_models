@@ -150,21 +150,6 @@ class Board(Base):
     timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
 
 
-class Equity(Base):
-    __tablename__ = 'equity'
-
-    ticker = Column(String, primary_key=True)
-    name = Column(String)
-    trend_1_name = Column(String, nullable=False, default='')
-    trend_1_value = Column(Integer)
-    trend_2_name = Column(String, nullable=False, default='')
-    trend_2_value = Column(Integer)
-    trend_3_name = Column(String, nullable=False, default='')
-    trend_3_value = Column(Integer)
-    timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
-    tags = Column(JSON, nullable=False, default=[])
-
-
 class IntrinioDump(Base):
     __tablename__ = 'intrinio_dump'
 
@@ -178,11 +163,27 @@ class IntrinioDump(Base):
     evtoebitda = Column(Float)
     short_interest = Column(Float)
     roe = Column(Float)
-    hundred_days_trading_range = Column(Float)
+    hundred_days_trading_range = Column(Float, default=0)
     trading_range_low = Column(Float)
     trading_range_high = Column(Float)
-    change = Column(Float)
+    change = Column(Float, default=0)
     industry = Column(String, nullable=False, default='')
+
+
+class Equity(Base):
+    __tablename__ = 'equity'
+
+    ticker = Column(String, ForeignKey('intrinio_dump.ticker', onupdate='CASCADE', ondelete='CASCADE'),
+                    primary_key=True)
+    name = Column(String)
+    trend_1_name = Column(String, nullable=False, default='')
+    trend_1_value = Column(Integer)
+    trend_2_name = Column(String, nullable=False, default='')
+    trend_2_value = Column(Integer)
+    trend_3_name = Column(String, nullable=False, default='')
+    trend_3_value = Column(Integer)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
+    tags = Column(JSON, nullable=False, default=[])
 
 
 class Tag(Base):
@@ -316,6 +317,17 @@ class AccessData(Base):
     login = Column(DateTime(timezone=True), nullable=True)
     logout = Column(DateTime(timezone=True), nullable=True)
     password = Column(DateTime(timezone=True), nullable=True)
+
+
+class ExposedEquityFields(Base):
+    __tablename__ = 'ee_fields'
+    __table_args__ = (
+        PrimaryKeyConstraint('equity_ticker', 'username'),
+    )
+
+    username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='CASCADE'))
+    equity_ticker = Column(String, nullable=False)
+    fields = Column(JSON, nullable=False)
 
 
 def to_dict(record: Base):
