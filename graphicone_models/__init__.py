@@ -330,6 +330,17 @@ class ExposedEquityFields(Base):
     fields = Column(JSON, nullable=False)
 
 
+class IIEquity(Base):
+    __tablename__ = 'ii_equity'
+    __table_args__ = (
+        PrimaryKeyConstraint('ticker', 'action', 'graph_id'),
+    )
+
+    ticker = Column(String, nullable=False)
+    action = Column(String, nullable=False)
+    graph_id = Column(String, ForeignKey('graph.id', ondelete='CASCADE', onupdate='CASCADE'))
+
+
 def to_dict(record: Base):
     dict_ = {}
     for key in record.__mapper__.c.keys():
