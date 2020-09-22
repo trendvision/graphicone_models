@@ -348,6 +348,14 @@ class EquityIcons(Base):
     link = Column(String, nullable=False)
 
 
+class CVSpaceItems(Base):
+    __tablename__ = 'cv_space_items'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, primary_key=True)
+    company_order = Column(JSON, nullable=False, default=[])
+
+
 def to_dict(record: Base):
     dict_ = {}
     for key in record.__mapper__.c.keys():
