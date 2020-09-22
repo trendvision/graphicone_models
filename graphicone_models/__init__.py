@@ -344,7 +344,7 @@ class IIEquity(Base):
 class EquityIcons(Base):
     __tablename__ = 'equity_icons'
 
-    ticker = Column(String, ForeignKey('equity.ticker', ondelete='NO ACTION', onupdate='CASCADE'))
+    ticker = Column(String, ForeignKey('equity.ticker', ondelete='NO ACTION', onupdate='CASCADE'), primary_key=True)
     link = Column(String, nullable=False)
 
 
