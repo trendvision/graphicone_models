@@ -341,6 +341,13 @@ class IIEquity(Base):
     graph_id = Column(String, ForeignKey('graph.id', ondelete='CASCADE', onupdate='CASCADE'))
 
 
+class EquityIcons(Base):
+    __tablename__ = 'equity_icons'
+
+    ticker = Column(String, ForeignKey('equity.ticker', ondelete='NO ACTION', onupdate='CASCADE'))
+    link = Column(String, nullable=False)
+
+
 def to_dict(record: Base):
     dict_ = {}
     for key in record.__mapper__.c.keys():
