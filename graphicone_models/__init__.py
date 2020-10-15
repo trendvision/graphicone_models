@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Boolean, String, JSON, DateTime, Integer, ForeignKey, func, schema, text,\
     PrimaryKeyConstraint, BigInteger, Float
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 import datetime
 
@@ -8,6 +9,7 @@ import datetime
 Base = declarative_base()
 BOARD_ID = schema.Sequence('board_id', start=1000000000000, increment=1)
 GRAPH_ID = schema.Sequence('graph_id', start=1000000000000, increment=1)
+MONITOR_ID = schema.Sequence('monitor_id', start=1000000000000, increment=1)
 
 
 class Account(Base):
@@ -268,8 +270,8 @@ class Graph(Base):
     publisher = Column(String, ForeignKey('account.username', ondelete='NO ACTION', onupdate='NO ACTION'))
     mongo_id = Column(String)
     graph_type = Column(String)
-    shifts = Column(JSON, nullable=False, default=[])
-    industries = Column(JSON, nullable=False, default=[])
+    shifts = Column(JSONB, nullable=False, default=[])
+    industries = Column(JSONB, nullable=False, default=[])
     upvote = Column(Integer, nullable=False, default=0)
     tags = relationship(Tag)
     equities = relationship(ExposedEquity)
@@ -328,6 +330,54 @@ class ExposedEquityFields(Base):
     username = Column(String, ForeignKey('account.username', ondelete='CASCADE', onupdate='CASCADE'))
     equity_ticker = Column(String, nullable=False)
     fields = Column(JSON, nullable=False)
+
+
+class IIEquity(Base):
+    __tablename__ = 'ii_equity'
+    __table_args__ = (
+        PrimaryKeyConstraint('ticker', 'action', 'graph_id'),
+    )
+
+    ticker = Column(String, ForeignKey('equity.ticker', ondelete='NO ACTON', onupdate='CASCADE'))
+    action = Column(String, nullable=False)
+    graph_id = Column(String, ForeignKey('graph.id', ondelete='CASCADE', onupdate='CASCADE'))
+
+
+class EquityIcons(Base):
+    __tablename__ = 'equity_icons'
+
+    ticker = Column(String, ForeignKey('equity.ticker', ondelete='NO ACTION', onupdate='CASCADE'), primary_key=True)
+    link = Column(String, nullable=False)
+
+
+class CVSpaceItems(Base):
+    __tablename__ = 'cv_space_items'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, primary_key=True)
+    company_order = Column(JSON, nullable=False, default=[])
+
+
+class Monitor(Base):
+    __tablename__ = 'monitor'
+
+    id = Column(String, MONITOR_ID, primary_key=True, default=text("'M' || nextval('monitor_id')"))
+    owner = Column(String, nullable=False)
+    companies = Column(JSON, nullable=False, default=[])
+    shifts = Column(JSON, nullable=False, default=[])
+    industries = Column(JSON, nullable=False, default=[])
+    tags = Column(JSON, nullable=False, default=[])
+
+
+class ChangedInfo(Base):
+    __tablename__ = 'changed_info'
+    __table_args__ = (
+        PrimaryKeyConstraint('graph_id', 'action', 'timestamp'),
+    )
+
+    graph_id = Column(String, nullable=False)
+    action = Column(String, nullable=False)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=func.current_timestamp())
 
 
 def to_dict(record: Base):
